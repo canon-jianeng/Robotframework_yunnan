@@ -1,0 +1,47 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Keywords ***
+进入企业账户列表
+    Click Element    //a[contains(.,'企业账户管理')]
+    Click Element    //span[contains(.,'企业账户列表')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/div[2]/div[1]/div[2]/button/i
+
+进入烟厂列表
+    Click Element    //li[@data-index='17']/a/span/i
+    Click Element    //li[@data-index='17']/ul/li[2]/a/span
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/div[2]/div[1]/div[2]/button/i
+
+短信验证码发送
+    [Arguments]    ${mobile}
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    ${params_data}    Create Dictionary    mobile    ${mobile}
+    ${pdata}    dumps    ${params_data}
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=smsCode    params=${pdata}
+    Create Session    yu    ${host}
+    ${test}    Get Request    yu    ${uri}    \    ${dict}
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${a}    Get Dictionary Items    ${return_text}
+    ${b}    Get Dictionary Keys    ${return_text}
+    ${c}    Get Dictionary Values    ${return_text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    ${return_data}    Get From Dictionary    ${return_text}    data
+    ${return_vcode}    Get From Dictionary    ${return_data}    vcode
+    [Return]    ${return_vcode}    # 验证码

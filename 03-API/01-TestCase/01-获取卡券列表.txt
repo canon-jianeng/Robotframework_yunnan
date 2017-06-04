@@ -1,0 +1,45 @@
+*** Settings ***
+Force Tags        SMOKE
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+获取卡券列表
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #get请求参数
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=getCouponList
+    Create Session    yu    ${host}
+    #发送get请求
+    ${test}    Get Request    yu    ${uri}    \    ${dict}
+    #验证get请求返回值
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    To Json    ${test.text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal As Strings    ${return_code}    0
+    ${return_data}    Get From Dictionary    ${return_text}    data
+    ${list_Length}    Get Length    ${return_data}
+    ${list}    Create List
+    #验证查询出的activity_id与数据库中一致
+    连接营销平台数据库cloud2_activity
+    : FOR    ${i}    IN RANGE    ${list_Length}
+    \    ${return_activityId}    Get From Dictionary    ${return_data[${i}]}    activityId
+    \    ${all_count}    query    SELECT COUNT(*) FROM tw_ext_coupon_info ci JOIN tw_ext_coupon_store cs ON ci.store_id=cs.store_id WHERE cs.sys_code='${syscode}' AND ci.activity_id ='${return_activityId}'
+    \    ${count}    Evaluate    str('${all_count[0][0]}')
+    \    Should Be Equal    ${count}    1
+    #    Append To List    ${list}    ${cc}
+    ${activityId}    Evaluate    tuple(${list})
+    log    ${activityId}
+    退出数据库

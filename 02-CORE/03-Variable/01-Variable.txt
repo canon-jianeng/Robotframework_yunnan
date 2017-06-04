@@ -1,0 +1,5 @@
+*** Variables ***
+${url}            http://yz2-f-stg.taiheiot.com/cloud2.oms/    # 云南中烟二维码应用平台
+${username_yn}    ynadmin    # 云南中烟管理员
+${password_yn}    ynadmin1    # 云南中烟管理员
+@{test}           1    2    3    4

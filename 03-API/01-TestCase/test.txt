@@ -1,0 +1,19 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+test
+    连接营销平台数据库cloud2_activity
+    ${id}    query    select id from c_user_info where phone=${mobile};
+    log    ${id}
+    退出数据库

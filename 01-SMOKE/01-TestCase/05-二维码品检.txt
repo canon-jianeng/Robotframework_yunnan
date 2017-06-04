@@ -1,0 +1,25 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chrome.exe    # 清理进程
+Test Teardown     安全退出
+Force Tags
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/01-SystemKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+
+*** Test Cases ***
+商标条盒入库检测
+    登录
+    进入商标条盒入库检测
+    页面名称校验    //h1[@class='page-header']    二维码品检 > 商标条盒入库检测
+    页面元素校验    //table[@class="table table-bordered"]    //div[@class='form-inline j-form']
+
+成品出厂检测
+    登录
+    进入成品出厂检测
+    页面名称校验    //h1[@class='page-header']    二维码品检 > 成品出厂检测
+    页面元素校验    //table[@class="table table-bordered"]    //div[@class='form-inline j-form']

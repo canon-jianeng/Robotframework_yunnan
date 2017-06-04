@@ -1,0 +1,37 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+
+*** Test Cases ***
+01-邀请码对应接口
+    [Setup]    邀请码对接接口数据准备
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #获取params值(请求参数)
+    ${params_data}    Create Dictionary    barcode    ${barcode}    inviteCode    tj001
+    ${pdata}    dumps    ${params_data}
+    #传入get请求参数
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=inviteCode    params=${pdata}
+    Create Session    yu    ${host}
+    #发送get请求
+    ${test}    Get Request    yu    entry/service.do    \    ${dict}
+    #验证get请求返回值
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${return_items}    Get Dictionary Items    ${return_text}
+    ${return_keys}    Get Dictionary Keys    ${return_text}
+    ${return_values}    Get Dictionary Values    ${return_text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    [Teardown]    邀请码对接接口数据初始化

@@ -1,0 +1,63 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+扫码记录查询（手机号）
+    [Tags]    SMOKE
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #获取params值(请求参数)
+    ${params_data}    Create Dictionary    mobile    ${mobile}    ctime    ${ctime}
+    ${pdata}    dumps    ${params_data}
+    #传入get请求参数
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=queryScanRecordByMobile    params=${pdata}
+    Create Session    lj    ${host}
+    #发送get请求
+    ${test}    Get Request    lj    ${uri}    \    ${dict}
+    #验证get请求返回值
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    ${return_data}    Get From Dictionary    ${return_text}    data
+    ${lt}    Get Length    ${return_data}
+    连接二维码平台数据库cloud2_code_history
+    : FOR    ${i}    IN RANGE    ${lt}
+    \    ${database}    query    SELECT id,CODE,ip,province,city,ctime FROM `c_order_scan` WHERE phone='${mobile}' order by id;
+    \    log    ${database}
+    \    ${id_get}    Evaluate    int(${database[${i}][0]})
+    \    ${brcode_get}    Evaluate    str('${database[${i}][1]}')
+    \    ${ipAddress_get}    Evaluate    str('${database[${i}][2]}')
+    \    ${province_get}    Evaluate    str('${database[${i}][3]}')
+    \    ${province_str}    Evaluate    '${province_get}'.decode('utf-8')    #u.encode('utf-8')    string转成unicode
+    \    #log    ${province_str}    \    #u.decode('utf-8')    unicode转成string
+    \    ${city_get}    Set Variable    ${database[${i}][4]}    #Set Variable 直接赋值
+    \    ${ctime_get}    Evaluate    str('${database[${i}][5]}')
+    \    ${return_id}    Get From Dictionary    ${return_data[${i}]}    id
+    \    Should Be Equal    ${return_id}    ${id_get}
+    \    ${return_barcode}    Get From Dictionary    ${return_data[${i}]}    barcode
+    \    Should Be Equal As Strings    ${return_barcode}    ${brcode_get}
+    \    ${return_ipAddress}    Get From Dictionary    ${return_data[${i}]}    ipAddress
+    \    Should Be Equal As Strings    ${return_ipAddress}    ${ipAddress_get}
+    \    ${return_province}    Get From Dictionary    ${return_data[${i}]}    province
+    \    Should Be Equal As Strings    ${return_province}    ${province_str}
+    \    ${return_city}    Get From Dictionary    ${return_data[${i}]}    city
+    \    Should Be Equal As Strings    ${return_city}    ${city_get}
+    \    ${return_createdAt}    Get From Dictionary    ${return_data[${i}]}    createdAt
+    \    log    ${return_createdAt}
+    \    #${aa}    Get Timestamp    ${ctime_get}
+    \    #Should Be Equal As Strings    ${createdAt}    ${ctime_stamp}
+    退出数据库

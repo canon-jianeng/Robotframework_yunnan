@@ -1,0 +1,65 @@
+*** Settings ***
+Library           Selenium2Library
+
+*** Keywords ***
+点击查询按钮
+    Click Element    //button[contains(.,'查询')]
+
+点击添加按钮
+    Click Element    //button[contains(.,'添加')]
+
+点击取消按钮
+    Click Element    //button[@class='btn btn-default']
+
+点击弹出框取消按钮
+    Unselect Frame
+    Click Element    //button[@class='simpleDialogCancleBtn']
+    Select Frame    name=right
+
+点击弹出框确认按钮
+    Unselect Frame
+    Click Element    //button[@class='simpleDialogSureBtn']
+    Select Frame    name=right
+
+奖品类型下拉框
+    [Arguments]    ${ButtonName}
+    Click Element    //button[contians(.,"${ButtonName}")]
+
+点击保存按钮
+    Click Element    //button[contains(.,'保存')]
+
+表格字符校验
+    [Arguments]    ${table_locator}    ${table_row}    ${table_column}    ${except_value_04_01}
+    ${variable_04_01}    Get Table Cell    ${table_locator}    ${table_row}    ${table_column}
+    Should Be Equal    ${variable_04_01}    ${except_value_04_01}
+
+页面元素校验
+    [Arguments]    ${element_locator1}    ${element_locator2}
+    Page Should Contain Element    ${element_locator1}
+    Page Should Contain Element    ${element_locator2}
+
+页面字符校验
+    [Arguments]    ${title_locator}    ${except_text}
+    ${title_text}    Get Text    ${title_locator}
+    Should Be Equal    ${title_text}    ${except_text}
+
+点击启用按钮
+    Click Element    //button[contains(.,'启用')]
+
+点击选择按钮
+    Click Element    //button[contains(.,'选择')]
+
+点击确定
+    Click Element    //button[contains(.,'确定')]
+
+点击清除按钮
+    Click Element    //button[contains(.,'清除')]
+
+点击修改按钮
+    Click Element    //a[contains(.,'修改')]
+
+点击删除按钮
+    Click Element    //a[contains(.,'删除')]
+
+点击停产按钮
+    Click Element    //a[contains(.,'停产')]

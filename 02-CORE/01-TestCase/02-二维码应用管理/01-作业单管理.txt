@@ -1,0 +1,19 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chromedriver.exe    # 清理进程
+Test Teardown     安全退出
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+01-作业单管理
+    登录
+    进入作业单管理
+    页面字符校验    //html/body/section/h1    二维码应用管理 > 作业单管理
+    页面元素校验    //html/body/section/div/div[1]/div[1]/label    //table[@class="table table-bordered"]

@@ -1,0 +1,45 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+验证二维码是否参加过活动
+    [Tags]    SMOKE
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #获取params值(请求参数)
+    ${params_data}    Create Dictionary    barcode    ${barcode}
+    ${pdata}    dumps    ${params_data}
+    #传入get请求参数
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=queryChanceDetailByBarcode    params=${pdata}
+    Create Session    lj    ${host}
+    #发送get请求
+    ${test}    Get Request    lj    ${uri}    \    ${dict}
+    #验证get请求返回值
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${return_data}    Get From Dictionary    ${return_text}    data
+    Should Be Equal As Strings    ${return_data}    null
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    连接营销平台数据库cloud2_activity
+    ${count_all}    query    SELECT COUNT(*) FROM c_market_lottery WHERE barcode='${barcode}';commit;
+    log    ${count_all}
+    ${value}    Evaluate    str(${count_all[0][0]})
+    log    ${value}
+    #判断此码是否验证且录入手机号
+    Run Keyword If    ${value} == '0'    Should Be Equal As Strings    ${return_msg}    此二维码未参与过一期的活动！
+    ...    ELSE    Should Be Equal As Strings    ${return_msg}    此二维码已经参与过一期的活动！
+    Run Keyword If    ${value} == '0'    Should Be Equal As Strings    ${return_code}    0
+    ...    ELSE    Should Be Equal As Strings    ${return_code}    1
+    退出数据库

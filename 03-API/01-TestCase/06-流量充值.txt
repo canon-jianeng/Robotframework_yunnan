@@ -1,0 +1,47 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+流量充值
+    [Tags]    SMOKE
+    [Setup]    流量充值接口数据初始化
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #请求参数params值
+    ${params_data}    Create Dictionary    flowValue    ${flowValue}    mobile    ${mobile_query}    retUri
+    ...    ${retUri}    orderId    ${orderId}
+    ${pdata}    dumps    ${params_data}
+    #传入get请求参数
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=teleFlow    params=${pdata}
+    Create Session    yu    ${host}
+    #发送get请求
+    ${test}    Get Request    yu    ${uri}    \    ${dict}
+    #验证get请求返回值
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${a}    Get Dictionary Items    ${return_text}
+    ${b}    Get Dictionary Keys    ${return_text}
+    ${c}    Get Dictionary Values    ${return_text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    ${return_data}    Get From Dictionary    ${return_text}    data
+    ${return_mobile}    Get From Dictionary    ${return_data}    mobile
+    Should Be Equal As Strings    ${return_mobile}    18682032584
+    ${return_amount}    Get From Dictionary    ${return_data}    amount
+    Should Be Equal As Strings    ${return_amount}    6
+    ${return_flowValue}    Get From Dictionary    ${return_data}    flowValue
+    Should Be Equal As Strings    ${return_flowValue}    50M
+    [Teardown]    流量充值接口数据初始化

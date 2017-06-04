@@ -1,0 +1,158 @@
+*** Settings ***
+Library           Selenium2Library
+
+*** Keywords ***
+点击查询按钮
+    Click Element    //button[contains(.,'查询')]
+
+点击添加按钮
+    Click Element    //button[contains(.,'添加')]
+
+点击取消按钮
+    Click Element    //button[@class='btn btn-default']
+
+点击弹出框取消按钮
+    Unselect Frame
+    Click Element    //button[@class='simpleDialogCancleBtn']
+    Select Frame    name=right
+
+点击弹出框确认按钮
+    Unselect Frame
+    Click Element    //button[@class='simpleDialogSureBtn']
+    Select Frame    name=right
+
+奖品类型下拉框
+    [Arguments]    ${ButtonName}
+    Click Element    //button[contians(.,"${ButtonName}")]
+
+点击保存按钮
+    Click Element    //button[contains(.,'保存')]
+
+表格字符校验
+    [Arguments]    ${table_locator}    ${table_row}    ${table_column}    ${except_value_04_01}
+    ${variable_04_01}    Get Table Cell    ${table_locator}    ${table_row}    ${table_column}
+    Should Be Equal    ${variable_04_01}    ${except_value_04_01}
+
+页面元素校验
+    [Arguments]    ${element_locator1}    ${element_locator2}
+    Page Should Contain Element    ${element_locator1}
+    Page Should Contain Element    ${element_locator2}
+
+页面字符校验
+    [Arguments]    ${title_locator}    ${except_text}
+    ${title_text}    Get Text    ${title_locator}
+    Should Be Equal    ${title_text}    ${except_text}
+
+点击启用按钮
+    Click Element    //button[contains(.,'启用')]
+
+点击选择按钮
+    Click Element    //button[contains(.,'选择')]
+
+点击确定
+    Click Element    //button[contains(.,'确定')]
+
+点击清除按钮
+    Click Element    //button[contains(.,'清除')]
+
+点击修改按钮
+    Click Element    //a[contains(.,'修改')]
+
+点击删除按钮
+    Click Element    //a[contains(.,'删除')]
+
+点击停产按钮
+    Click Element    //a[contains(.,'停产')]
+
+产品类型下拉框
+    [Arguments]    ${product_type}
+    Select From List By Value    xpath=//select[@class="form-control"]    ${product_type}
+
+产品名称文本框
+    [Arguments]    ${unit}
+    Input Text    id=unit    ${unit}
+
+产品描述文本框
+    [Arguments]    ${description}
+    Input Text    id=description    ${description}
+
+产品查询产品名称
+    [Arguments]    ${product_name}
+    Input Text    xpath=//div[@class="form-inline j-form"]/div[3]/input    ${product_name}
+
+产品名称为空提示
+    Click Element    //html/body/section/div/div/div[4]/div/button[1]
+
+点击停产产品
+    Click Element    //html/body/section/div/div[4]/table/tbody/tr/td[8]/a[2]
+
+点击删除产品
+    Click Element    //html/body/section/div/div[4]/table/tbody/tr[1]/td[8]/a[2]
+
+物资类型下拉框
+    [Arguments]    ${type}
+    Select From List By Value    //html/body/section/div/div/div[1]/div/select    ${type}
+
+包装类型下拉框
+    [Arguments]    ${type1}
+    Select From List By Value    //html/body/section/div/div/div[2]/div/select    ${type1}
+
+销售类型下拉框
+    [Arguments]    ${type2}
+    Select From List By Value    //html/body/section/div/div/div[3]/div/select    ${type2}
+
+物资描述文本框
+    [Arguments]    ${materialDesc}
+    Input Text    name=materialDesc    ${materialDesc}
+
+选择窗口产品名称
+    [Arguments]    ${window_name}
+    Input Text    //div[@class='con-head-l']/div[3]/input    ${window_name}
+
+点击单选框
+    Click Element    name=selectProduct
+
+物资查询产品名称
+    [Arguments]    ${material}
+    Input Text    //div[@class='form-inline j-form']/div[5]/input    ${material}
+
+点击删除物资
+    Click Element    //html/body/section/div/div[4]/table/tbody/tr/td[10]/a[2]
+
+企业账户下拉框
+    [Arguments]    ${company_name}
+    Select From List    name=companyId    ${company_name}
+
+印刷厂编号文本框
+    [Arguments]    ${printesId}
+    Input Text    name=printesId    ${printesId}
+
+印刷厂名称文本框
+    [Arguments]    ${printesName}
+    Input Text    name=printesName    ${printesName}
+
+详细地址文本框
+    [Arguments]    ${address}
+    Input Text    name=address    ${address}
+
+备注文本框
+    [Arguments]    ${remark}
+    Input Text    name=remark    ${remark}
+
+印刷厂编号查询
+    [Arguments]    ${printId}
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    ${printId}
+
+印刷厂名称查询
+    [Arguments]    ${select_print}
+    Input Text    //div[@class='form-inline j-form']/div[2]/input    ${select_print}
+
+操作按钮
+    [Arguments]    ${aName}
+    Click Element    //a[contians(.,"${aName}")]
+
+点击停用印刷厂
+    Click Element    //html/body/section/div[1]/div[4]/table/tbody/tr/td[9]/a[3]
+
+点击启用印刷厂
+    Click Element    //html/body/section/div[1]/div[4]/table/tbody/tr/td[9]/a[2]

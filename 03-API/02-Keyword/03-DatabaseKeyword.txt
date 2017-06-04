@@ -1,0 +1,163 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Keywords ***
+连接common数据库
+    Connect To Database Using Custom Params    pymysql    database='cloud2_code_common', user='thwlstg', password='thwlstg', host='192.168.0.125', port=33306,charset='utf8'
+
+连接user数据库
+    Connect To Database Using Custom Params    pymysql    database='cloud2_user', user='thwlstg', password='thwlstg', host='192.168.0.125', port=33306,charset='utf8'
+
+连接营销平台数据库cloud2_activity
+    Connect To Database Using Custom Params    pymysql    database='cloud2_activity', user='thwlstg', password='thwlstg', host='192.168.0.129', port=33306,charset='utf8'
+
+连接营销平台数据库cloud2_public
+    Connect To Database Using Custom Params    pymysql    database='cloud2_public', user='thwlstg', password='thwlstg', host='192.168.0.129', port=33306,charset='utf8'
+
+退出数据库
+    Disconnect From Database
+
+产品管理数据初始化
+    连接common数据库
+    Query    DELETE FROM c_order_section_info WHERE material_section_id IN( SELECT id FROM c_order_materials_section WHERE \ NAME LIKE '%selenium%');commit;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';commit;
+    退出数据库
+
+产品管理数据准备
+    连接common数据库
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';commit;
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4002',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','263','111111','selenium-descrition');commit；
+    退出数据库
+
+新增物资管理数据初始化
+    连接common数据库
+    Query    DELETE FROM c_order_materials WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';commit;
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4003',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','263','111111','selenium-descrition');commit；
+    Query    INSERT INTO c_order_materials (NAME,TYPE,STATUS,ctime,utime,cuid,com_id,webpath,materiials_section_id,material_serial_num,MATERIALS_DESC,IS_PWD,IS_ENCODE,IS_ACTIVITY,is_configured) \ VALUE ('selenium-test-2-小盒','2301','1101',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','263','www.test.com', \ (SELECT id FROM c_order_materials_section WHERE NAME LIKE '%selenium%' OR DESCRIPTION LIKE '%selenium%'),'111111111','description-selenium','0','0','0','0');COMMIT;
+    退出数据库
+
+物资管理数据准备
+    产品管理数据准备
+    连接common数据库
+    Query    INSERT INTO c_order_materials (NAME,TYPE,STATUS,ctime,utime,cuid,com_id,webpath,materiials_section_id,material_serial_num,MATERIALS_DESC,IS_PWD,IS_ENCODE,IS_ACTIVITY,is_configured) VALUE ((SELECT ',' + '-小盒' NAME FROM c_order_materials_section WHERE NAME LIKE '%selenium%' OR DESCRIPTION LIKE '%selenium%'),'2301','1101',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','263','www.test.com', (SELECT id FROM c_order_materials_section WHERE NAME LIKE '%selenium%' OR DESCRIPTION LIKE '%selenium%'),'111111111','description-selenium','0','0','0','0');commit;
+    退出数据库
+
+印刷厂管理数据初始化
+    连接common数据库
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';commit;
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4002',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','263','111111','selenium-descrition');commit；
+    退出数据库
+
+采购计划数据初始化
+    连接common数据库
+    Query    DELETE FROM c_purchase_main WHERE NAME LIKE '%selenium%';commit;
+    退出数据库
+
+作业单管理数据初始化
+    连接common数据库
+    Query    DELETE FROM c_order_info WHERE NAME LIKE '%selenium%';commit;
+    退出数据库
+
+邀请码对接接口数据准备
+    连接营销平台数据库cloud2_activity
+    query    INSERT INTO `tw_shop` (`id`, `created_at`, `updated_at`, `address`, `shop_name`, `province`, `city`, `mobile`, `name`, `specialty_no`, `invite_code`, `invite_prefix`, `invite_id`) VALUES('','2016-04-13 16:56:56','2016-04-13 16:56:56','test','test','天津市','天津市','022-93398251','test','320101200262','test1','tj','10');commit;
+    退出数据库
+
+邀请码对接接口数据初始化
+    连接营销平台数据库cloud2_activity
+    query    DELETE FROM tw_shop WHERE invite_code='test1';commit;
+    退出数据库
+
+话费充值接口数据初始化
+    连接二维码平台数据库cloud2_public
+    query    DELETE FROM `tw_charge_record` WHERE order_id='selenium-test';commit;
+    退出数据库
+
+2.0外部接口测试准备
+    连接营销平台数据库cloud2_activity
+    QUERY    INSERT INTO `tw_ext_sys_info` (`id`,`name`,`sys_code`, `salt`, `ctime`, `utime`, `etime`, `status`, `max_times`, `product_code`) \ VALUES('9999','自动化测试','ZDH','qazwsx==','2016-04-13 17:03:27','2016-04-13 17:03:29','2019-03-17 09:17:34','activate','1000000','zdh');commit;
+
+连接二维码平台数据库cloud2_public
+    Connect To Database Using Custom Params    pymysql    database='cloud2_public', user='thwlstg', password='thwlstg', host='192.168.0.125', port=33306,charset='utf8'
+
+流量充值接口数据初始化
+    连接二维码平台数据库cloud2_public
+    query    DELETE FROM `tw_charge_record_flow` WHERE order_id='selenium-test';commit;
+    退出数据库
+
+找回密码接口数据准备
+    找回密码接口数据初始化
+    连接营销平台数据库cloud2_activity
+    query    INSERT INTO `c_user_info` (id,phone,pwd,ctime,STATUS,is_retail,isBind) VALUES(1,'18600000000','f0f83363314d242baca3d85d1e06686a',NOW(),1101,0,0);commit;
+    退出数据库
+
+数据库添加用户及积分
+    连接营销平台数据库cloud2_activity
+    query    DELETE FROM `c_user_info` WHERE phone=${mobile};commit
+    query    INSERT INTO `c_user_info` (id,phone,ctime,STATUS,com_id,is_retail,isBind) VALUES(0,${mobile},NOW(),1101,0,0,0);commit;
+    ${ida}    query    select id from c_user_info where phone=${mobile};
+    ${id}    Evaluate    int(${ida[0][0]})
+    query    INSERT INTO `c_user_point` VALUES(${id},${point_type},${point},NOW());commit;
+    退出数据库
+
+数据库删除用户及积分
+    连接营销平台数据库cloud2_activity
+    ${cc}    query    select count(*) from c_user_info where phone=${mobile};
+    log    ${cc}
+    ${cc2}    Evaluate    int(${cc[0][0]})
+    : FOR    ${i}    IN RANGE    ${cc2}
+    \    ${idd}    query    select id from c_user_info where phone=${mobile};
+    \    ${id}    Evaluate    int(${idd[0][${i}-1]})
+    \    query    delete from c_user_point where user_id=${id};commit;
+    query    DELETE FROM `c_user_info` WHERE phone=${mobile};commit;
+    退出数据库
+
+找回密码接口数据初始化
+    连接营销平台数据库cloud2_activity
+    query    DELETE FROM `c_user_info` WHERE phone='18600000000';commit;
+    退出数据库
+
+用户注册
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    ${vcode}    短信验证码发送    ${mobile}
+    ${params_data}    Create Dictionary    mobile    ${mobile}    password    ${password}    vcode
+    ...    ${vcode}
+    ${pdata}    dumps    ${params_data}
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=registerMember    params=${pdata}
+    Create Session    lj    ${host}
+    ${test}    Get Request    lj    ${uri}    \    ${dict}
+    Should Be Equal As Strings    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    ${returm_data}    Get From Dictionary    ${return_text}    data
+    ${return_mobile}    Get From Dictionary    ${returm_data}    mobile
+    连接营销平台数据库cloud2_activity
+    ${count_id}    query    SELECT COUNT(id) FROM `c_user_info` WHERE phone=${mobile}
+    ${value}    Evaluate    int(${count_id[0][0]})
+    Should Be Equal As Strings    ${value}    1
+
+添加用户及积分
+
+可使用的卡券activity_id
+    连接营销平台数据库cloud2_activity
+    ${activity_Id}    query    SELECT ci.activity_id FROM tw_ext_coupon_info ci JOIN tw_ext_coupon_list cl ON ci.id=cl.info_id JOIN tw_ext_coupon_store cs ON ci.store_id=cs.store_id WHERE cs.sys_code='${syscode}'
+    退出数据库
+    [Return]    ${activity_Id}
+
+连接二维码平台数据库cloud2_code_history
+    Connect To Database Using Custom Params    pymysql    database='cloud2_code_history', user='thwlstg', password='thwlstg', host='192.168.0.125', port=33306,charset='utf8'

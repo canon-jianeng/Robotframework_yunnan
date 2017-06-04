@@ -1,0 +1,155 @@
+*** Settings ***
+Test Setup        OperatingSystem.Run    taskkill /F /IM chromedriver.exe    # 清理进程
+Test Teardown     安全退出
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增
+    [Setup]    新增印刷厂数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    点击添加按钮
+    企业账户下拉框    print_selenium
+    印刷厂编号文本框    99
+    印刷厂名称文本框    selenium印刷厂
+    详细地址文本框    selenium地址
+    备注文本框    selenium_remark
+    点击保存按钮
+    印刷厂编号查询    99
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    3    selenium印刷厂
+    关闭所有浏览器
+    连接user数据库
+    数据库字符校验    SELECT NAME FROM `c_company_info` WHERE slug = '99'    selenium印刷厂
+    退出数据库
+    [Teardown]    印刷厂管理数据清理
+
+新增-取消新增
+    [Setup]    新增印刷厂数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    点击添加按钮
+    企业账户下拉框    print_selenium
+    印刷厂编号文本框    99
+    印刷厂名称文本框    selenium印刷厂
+    详细地址文本框    selenium地址
+    备注文本框    selenium_remark
+    点击取消按钮
+    关闭所有浏览器
+    连接user数据库
+    数据库数值校验    SELECT COUNT(*) FROM `c_company_info` WHERE slug = '99'    0
+    退出数据库
+    [Teardown]    印刷厂管理数据清理
+
+新增-印刷厂编号已存在
+    [Setup]    印刷厂唯一性校验数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    点击添加按钮
+    企业账户下拉框    print_selenium2
+    印刷厂编号文本框    99
+    印刷厂名称文本框    selenium印刷厂
+    详细地址文本框    selenium地址
+    备注文本框    selenium_remark
+    点击保存按钮
+    Unselect Frame
+    页面字符校验    //div[@class='tipDialog-con']    编号已重复,请重新书写一个
+    关闭所有浏览器
+    [Teardown]    印刷厂管理数据清理
+
+修改-正常修改
+    [Setup]    修改印刷厂管理数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    点击修改按钮
+    备注文本框    selenium_remark_modifiy
+    点击保存按钮
+    关闭所有浏览器
+    连接user数据库
+    数据库字符校验    SELECT remark FROM `c_company_info` WHERE slug = '99'    selenium_remark_modifiy
+    退出数据库
+    [Teardown]    印刷厂管理数据清理
+
+修改-正常停用
+    [Setup]    修改印刷厂管理数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    点击停用印刷厂
+    点击弹出框确认按钮
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    4    停用
+    关闭所有浏览器
+    连接user数据库
+    数据库数值校验    SELECT STATUS FROM \ `c_company_info` WHERE NAME = 'selenium_print'    2
+    退出数据库
+    [Teardown]    印刷厂管理数据清理
+
+修改-取消停用
+    [Setup]    修改印刷厂管理数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    点击停用印刷厂
+    点击弹出框取消按钮
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    4    启用
+    关闭所有浏览器
+    连接user数据库
+    数据库数值校验    SELECT STATUS FROM \ `c_company_info` WHERE NAME = 'selenium_print'    1
+    退出数据库
+    [Teardown]    印刷厂管理数据清理
+
+修改-正常启用
+    [Setup]    启用印刷厂管理数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    点击启用印刷厂
+    点击弹出框确认按钮
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    4    启用
+    关闭所有浏览器
+    连接user数据库
+    数据库数值校验    SELECT STATUS FROM \ `c_company_info` WHERE NAME = 'selenium_print'    1
+    退出数据库
+    [Teardown]    印刷厂管理数据清理
+
+修改-取消启用
+    [Setup]    启用印刷厂管理数据准备
+    登录
+    进入印刷厂管理
+    页面字符校验    //html/body/section/h1    基础数据 > 印刷厂管理
+    印刷厂名称查询    selenium_print
+    点击启用印刷厂
+    点击弹出框取消按钮
+    印刷厂名称查询    selenium_print
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    4    停用
+    关闭所有浏览器
+    连接user数据库
+    数据库数值校验    SELECT STATUS FROM \ `c_company_info` WHERE NAME = 'selenium_print'    2
+    退出数据库
+    [Teardown]    印刷厂管理数据清理

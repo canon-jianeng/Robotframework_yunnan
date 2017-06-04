@@ -1,0 +1,89 @@
+*** Settings ***
+Library           Selenium2Library
+Resource          ../03-Variable/01-Variable.txt
+Library           OperatingSystem
+Library           DatabaseLibrary
+Library           pymysql
+Resource          01-SystemKeyword.txt
+
+*** Keywords ***
+登录
+    Open Browser    ${url}    gc
+    设置速度
+    Maximize Browser Window
+    Input Text    username    ${username_yn}
+    Input Text    password    ${password_yn}
+    Click Element    submits
+    Wait Until Page Contains Element    //*[@id="out"]/span
+
+进入产品管理
+    Click Element    //a[contains(.,'基础数据')]
+    Click Element    //span[contains(.,'产品管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/section/div/div[1]/div[5]/button[1]
+
+进入物资管理
+    Click Element    //a[contains(.,'基础数据')]
+    Click Element    //span[contains(.,'物资管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/section/div/div[1]/div[6]/button[1]
+
+进入印刷厂管理
+    Click Element    //a[contains(.,'基础数据')]
+    Click Element    //span[contains(.,'印刷厂管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/section/div[1]/div[1]/div[4]/button[1]
+
+进入采购计划
+    Click Element    //a[contains(.,'基础数据')]
+    Click Element    //span[contains(.,'采购计划')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/section/div[1]/div[1]/div[6]/button[1]
+
+进入作业单管理
+    Click Element    //a[contains(.,'二维码应用管理')]
+    Click Element    //span[contains(.,'作业单管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //button[@class="btn btn-info"]
+
+进入码包管理
+    Click Element    //a[contains(.,'二维码应用管理')]
+    Click Element    //span[contains(.,'码包管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //button[@class="btn btn-info"]
+
+进入激活管理
+    Click Element    //a[contains(.,'二维码应用管理')]
+    Click Element    //span[contains(.,'激活管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //div[@class='table-btn']
+
+进入二维码查询
+    Click Element    //a[contains(.,'二维码应用管理')]
+    Click Element    //span[contains(.,'二维码查询')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //*[@id="codeBtn"]
+
+进入账户管理
+    Click Element    //a[contains(.,'权限管理')]
+    Click Element    //span[contains(.,'账户管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/div[2]/div[1]/div[2]/button
+
+进入角色管理
+    Click Element    //a[contains(.,'权限管理')]
+    Click Element    //span[contains(.,'角色管理')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/div[2]/div[1]/div[2]/button
+
+进入企业账户列表
+    Click Element    //a[contains(.,'企业账户管理')]
+    Click Element    //span[contains(.,'企业账户列表')]
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/div[2]/div[1]/div[2]/button/i
+
+进入烟厂列表
+    Click Element    //li[@data-index='17']/a/span/i
+    Click Element    //li[@data-index='17']/ul/li[2]/a/span
+    Select Frame    name=right
+    Wait Until Page Contains Element    //html/body/div[2]/div[1]/div[2]/button/i

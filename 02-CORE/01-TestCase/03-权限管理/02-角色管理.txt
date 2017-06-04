@@ -1,0 +1,109 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chrome.exe    # 清理进程
+Test Teardown     安全退出
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增
+    [Setup]    角色管理数据清理
+    登录
+    进入角色管理
+    页面字符校验    //html/body/div[1]    权限管理角色管理
+    Click Element    //i[@class='add-s-icon']
+    Input Text    id=name    auto_test
+    Input Text    xpath=//textarea[@name='description']    seleniumtest
+    Click Element    //i[@class='sure-white-icon']
+    Input Text    id=searchValue    auto_test
+    Click Element    //i[@class='search-icon']
+    表格字符校验    xpath=//table[@id='DataTable']    2    3    seleniumtest
+    连接user数据库
+    数据库字符校验    SELECT description FROM `sys_role` WHERE NAME='auto_test'    seleniumtest
+    退出数据库
+    Close All Browsers
+    [Teardown]    角色管理数据清理
+
+新增-取消新增
+    [Setup]    角色管理数据清理
+    登录
+    进入角色管理
+    页面字符校验    //html/body/div[1]    权限管理角色管理
+    Click Element    //i[@class='add-s-icon']
+    Input Text    id=name    auto_test
+    Input Text    xpath=//textarea[@name='description']    selenium_test
+    Click Element    //i[@class='err-white-icon']
+    连接user数据库
+    数据库数值校验    SELECT COUNT(*) FROM sys_role WHERE NAME='%auto_test'    0
+    退出数据库
+    Close All Browsers
+    [Teardown]    角色管理数据清理
+
+修改-正常修改
+    [Setup]    修改角色管理数据准备
+    登录
+    进入角色管理
+    页面字符校验    //html/body/div[1]    权限管理角色管理
+    Input Text    id=searchValue    auto_test
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[4]/a[1]
+    Input Text    xpath=//textarea[@name='description']    selenium_test_modify
+    Click Element    //i[@class='sure-white-icon']
+    表格字符校验    xpath=//table[@id='DataTable']    2    3    selenium_test_modify
+    连接user数据库
+    数据库字符校验    SELECT description FROM sys_role WHERE NAME='auto_test'    selenium_test_modify
+    退出数据库
+    Close All Browsers
+    [Teardown]    角色管理数据清理
+
+修改-取消修改
+    [Setup]    修改角色管理数据准备
+    登录
+    进入角色管理
+    页面字符校验    //html/body/div[1]    权限管理角色管理
+    Input Text    id=searchValue    auto_test
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[4]/a[1]
+    Input Text    xpath=//textarea[@name='description']    selenium_test_modify
+    Click Element    //i[@class='err-white-icon']
+    连接user数据库
+    数据库字符校验    SELECT description FROM sys_role WHERE NAME='auto_test'    selenium-testrole
+    退出数据库
+    Close All Browsers
+    [Teardown]    角色管理数据清理
+
+删除-正常删除
+    [Setup]    修改角色管理数据准备
+    登录
+    进入角色管理
+    页面字符校验    //html/body/div[1]    权限管理角色管理
+    Input Text    id=searchValue    auto_test
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[4]/a[2]
+    Click Element    //i[@class='sure-white-icon']
+    连接user数据库
+    数据库数值校验    SELECT COUNT(*) FROM sys_role WHERE NAME='auto_test'    0
+    退出数据库
+    Close All Browsers
+    [Teardown]    角色管理数据清理
+
+删除-取消删除
+    [Setup]    修改角色管理数据准备
+    登录
+    进入角色管理
+    页面字符校验    //html/body/div[1]    权限管理角色管理
+    Input Text    id=searchValue    auto_test
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[4]/a[2]
+    Click Element    //i[@class='err-white-icon']
+    连接user数据库
+    数据库字符校验    SELECT description FROM sys_role WHERE NAME='auto_test'    selenium-testrole
+    退出数据库
+    Close All Browsers
+    [Teardown]    角色管理数据清理

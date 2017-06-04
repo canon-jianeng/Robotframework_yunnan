@@ -1,0 +1,38 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chrome.exe    # 清理进程
+Test Teardown     安全退出
+Force Tags
+Default Tags
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/01-SystemKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+
+*** Test Cases ***
+产品管理
+    登录
+    进入产品管理
+    页面名称校验    xpath=//h1[@class="page-header"]    基础数据 > 产品管理
+    页面元素校验    xpath=//div[@class="form-group"]    xpath=//table[@class="table table-bordered"]
+
+物资管理
+    登录
+    进入物资管理
+    页面名称校验    xpath=//h1[@class="page-header"]    基础数据 > 物资管理
+    页面元素校验    xpath=//div[@class="form-inline j-form"]/div[1]/label    xpath=//table[@class="table table-bordered"]
+
+印刷厂管理
+    登录
+    进入印刷厂管理
+    页面名称校验    xpath=//h1[@class="page-header"]    基础数据 > 印刷厂管理
+    页面元素校验    xpath=//div[@class="form-inline j-form"]/div[1]/label    //table[@class="table table-bordered"]
+
+采购计划
+    登录
+    进入采购计划
+    页面名称校验    xpath=//h1[@class="page-header"]    基础数据 > 采购计划
+    页面元素校验    xpath=//div[@class="form-inline j-form"]/div[1]/label    //table[@class="table table-bordered"]

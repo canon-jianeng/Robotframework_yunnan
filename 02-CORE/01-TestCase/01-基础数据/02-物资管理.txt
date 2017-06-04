@@ -1,0 +1,121 @@
+*** Settings ***
+Test Setup        OperatingSystem.Run    taskkill /F /IM chromedriver.exe    # 清理进程
+Test Teardown     安全退出
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增
+    [Setup]    新增物资管理数据准备
+    登录
+    进入物资管理
+    点击添加按钮
+    物资类型下拉框    2301
+    包装类型下拉框    0
+    销售类型下拉框    0
+    物资描述文本框    description-selenium
+    点击选择按钮
+    选择窗口产品名称    selenium
+    点击查询按钮
+    点击单选框
+    点击确定
+    点击保存按钮
+    物资查询产品名称    selenium
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    3    selenium-test-2-小盒
+    连接common数据库
+    数据库字符校验    SELECT NAME FROM `c_order_materials` WHERE materials_desc LIKE '%selenium%'    selenium-test-2-小盒
+    退出数据库
+    关闭所有浏览器
+    [Teardown]    物资管理数据清理
+
+新增-取消新增
+    [Setup]    新增物资管理数据准备
+    登录
+    进入物资管理
+    点击添加按钮
+    物资类型下拉框    2301
+    包装类型下拉框    0
+    销售类型下拉框    0
+    物资描述文本框    description-selenium
+    点击选择按钮
+    选择窗口产品名称    selenium
+    点击查询按钮
+    点击单选框
+    点击确定
+    点击取消按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT count(1) FROM `c_order_materials` WHERE materials_desc LIKE '%selenium%'    0
+    退出数据库
+    [Teardown]    物资管理数据清理
+
+修改-正常修改
+    [Setup]    修改物资管理数据准备
+    登录
+    进入物资管理
+    页面字符校验    //html/body/section/h1    基础数据 > 物资管理
+    物资查询产品名称    selenium
+    点击查询按钮
+    点击修改按钮
+    物资描述文本框    description-selenium_modify
+    点击保存按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库字符校验    SELECT materials_desc FROM `c_order_materials` WHERE NAME = 'selenium-test-2-小盒'    description-selenium_modify
+    退出数据库
+    [Teardown]    物资管理数据清理
+
+修改-取消修改
+    [Setup]    修改物资管理数据准备
+    登录
+    进入物资管理
+    页面字符校验    //html/body/section/h1    基础数据 > 物资管理
+    物资查询产品名称    selenium
+    点击查询按钮
+    点击修改按钮
+    物资描述文本框    description-selenium_modify
+    点击取消按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库字符校验    SELECT materials_desc FROM `c_order_materials` WHERE NAME = 'selenium-test-2-小盒'    description-selenium
+    退出数据库
+    [Teardown]    物资管理数据清理
+
+删除-正常删除
+    [Setup]    修改物资管理数据准备
+    登录
+    进入物资管理
+    页面字符校验    //html/body/section/h1    基础数据 > 物资管理
+    物资查询产品名称    selenium
+    点击查询按钮
+    ${test111}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    点击删除物资
+    点击弹出框确认按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT c_order_materials.status FROM c_order_materials WHERE material_serial_num = '${test111}'    1102
+    退出数据库
+    [Teardown]    物资管理数据清理
+
+删除-取消删除
+    [Setup]    修改物资管理数据准备
+    登录
+    进入物资管理
+    页面字符校验    //html/body/section/h1    基础数据 > 物资管理
+    物资查询产品名称    selenium
+    点击查询按钮
+    ${test111}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    点击删除物资
+    点击弹出框取消按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT c_order_materials.status FROM c_order_materials WHERE material_serial_num = '${test111}'    1101
+    退出数据库
+    [Teardown]    物资管理数据清理

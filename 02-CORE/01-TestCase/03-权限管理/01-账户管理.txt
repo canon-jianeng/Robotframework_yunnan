@@ -1,0 +1,147 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chrome.exe    # 清理进程
+Test Teardown     安全退出
+Force Tags
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增
+    [Setup]    账户管理数据清理
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Click Element    //i[@class='add-s-icon']
+    Input Text    id=user_name    seleniumuser
+    Input Text    id=password    password1234
+    Input Text    id=rePassword    password1234
+    Input Text    id=name    sele
+    Input Text    id=job_name    测试职位
+    Input Text    id=mobilePhone    13066668888
+    Input Text    id=description    测试备注
+    Click Element    //button[@class='btn-g btn-main']
+    Select From List    id=option    账户名
+    Input Text    id=searchValue    seleniumuser
+    Click Element    //i[@class='search-icon']
+    sleep    2
+    表格字符校验    xpath=//table[@id='DataTable']    2    3    测试职位
+    连接user数据库
+    数据库字符校验    SELECT jobName FROM sys_user_detail WHERE NAME='sele';COMMIT;    测试职位
+    退出数据库
+    Close All Browsers
+    [Teardown]    账户管理数据清理
+
+新增-取消新增
+    [Setup]    账户管理数据清理
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Click Element    //i[@class='add-s-icon']
+    Input Text    id=user_name    seleniumuser
+    Input Text    id=password    password1234
+    Input Text    id=rePassword    password1234
+    Input Text    id=name    sele
+    Input Text    id=job_name    测试职位
+    Input Text    id=description    测试备注
+    Click Element    //button[@class='btn-g btn-cancle']
+    连接user数据库
+    数据库数值校验    SELECT COUNT(*) FROM sys_user_detail WHERE NAME='sele';COMMIT;    0
+    退出数据库
+    Close All Browsers
+    [Teardown]    账户管理数据清理
+
+新增-账户名称已存在
+    [Setup]    修改账户管理数据准备
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Click Element    //i[@class='add-s-icon']
+    Input Text    id=user_name    seleniumuser
+    Input Text    id=password    password1234
+    Input Text    id=rePassword    password1234
+    页面字符校验    xpath=//form[@id='insertUserForm']/ul/li[1]/div/label    用户名已存在,请重新输入
+    Close All Browsers
+    [Teardown]    账户管理数据清理
+
+修改-正常修改
+    [Setup]    修改账户管理数据准备
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Select From List    id=option    账户名
+    Input Text    id=searchValue    seleniumuser
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[5]/a[1]
+    Input Text    id=job_name    修改名称
+    Input Text    id=description    test_selenium_modify
+    Click Element    //button[@class='btn-g btn-main']
+    表格字符校验    xpath=//table[@id='DataTable']    2    3    修改名称
+    连接user数据库
+    数据库字符校验    SELECT jobName FROM sys_user_detail WHERE NAME='sele';COMMIT;    修改名称
+    退出数据库
+    Close All Browsers
+    [Teardown]    账户管理数据清理
+
+修改-取消修改
+    [Setup]    修改账户管理数据准备
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Select From List    id=option    账户名
+    Input Text    id=searchValue    seleniumuser
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[5]/a[1]
+    Input Text    id=job_name    已修改名称
+    Input Text    id=description    test_modify
+    Click Element    //button[@class='btn-g btn-cancle']
+    连接user数据库
+    数据库数值校验    SELECT COUNT(*) FROM sys_user_detail WHERE jobName='已修改名称' or description='test_modify';COMMIT;    0
+    退出数据库
+    Close All Browsers
+    [Teardown]    账户管理数据清理
+
+停用-正常停用
+    [Setup]    修改账户管理数据准备
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Select From List    id=option    账户名
+    Input Text    id=searchValue    seleniumuser
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[5]/a[2]
+    Click Element    //button[@id='yesDialog']
+    连接user数据库
+    数据库数值校验    SELECT enabled FROM sys_user WHERE username='seleniumuser'    0
+    退出数据库
+    Close All Browsers
+    [Teardown]    账户管理数据清理
+
+停用-取消停用
+    [Setup]    修改账户管理数据准备
+    登录
+    进入账户管理
+    页面字符校验    //html/body/div[1]/a    账户管理
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Select From List    id=option    账户名
+    Input Text    id=searchValue    seleniumuser
+    Click Element    //i[@class='search-icon']
+    Click Element    //*[@id="DataTable"]/tbody/tr/td[5]/a[2]
+    Click Element    //button[@id='noDialog']
+    连接user数据库
+    数据库数值校验    SELECT enabled FROM sys_user WHERE username='seleniumuser'    1
+    退出数据库
+    Close All Browsers
+    [Teardown]    账户管理数据清理

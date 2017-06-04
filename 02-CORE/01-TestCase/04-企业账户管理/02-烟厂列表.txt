@@ -1,0 +1,105 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chrome.exe    # 清理进程
+Test Teardown     安全退出
+Force Tags
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增
+    [Setup]    新增烟厂数据准备
+    登录
+    进入烟厂列表
+    页面字符校验    //html/body/div[1]/a[2]    烟厂列表
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Click Element    //i[@class='add-s-icon']
+    Select From List    uid    fac_selenium
+    Input Text    //input[@id="name"]    测试企业
+    Input Text    name=slug    SE
+    ${current_time}    Get Time    year month day
+    ${end_time}    Get Time    year month day    NOW + 7day
+    Input Text    id=stime    ${current_time}
+    Input Text    id=etime    ${end_time}
+    Click Element    //i[@class='sure-white-icon']
+    Input Text    id=searchValue    fac_selenium
+    Click Element    //i[@class='search-icon']
+    表格字符校验    xpath=//table[@id='DataTable']    2    2    测试企业
+    Close All Browsers
+    连接user数据库
+    数据库字符校验    SELECT NAME FROM `c_company_info` WHERE slug = 'SE'    测试企业
+    退出数据库
+    [Teardown]    烟厂列表数据清理
+
+新增-取消新增
+    [Setup]    新增烟厂数据准备
+    登录
+    进入烟厂列表
+    页面字符校验    //html/body/div[1]/a[2]    烟厂列表
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Click Element    //i[@class='add-s-icon']
+    Select From List    uid    fac_selenium
+    Input Text    //input[@id="name"]    测试企业
+    Input Text    name=slug    SE
+    ${current_time}    Get Time    year month day
+    ${end_time}    Get Time    year month day    NOW + 7day
+    Input Text    id=stime    ${current_time}
+    Input Text    id=etime    ${end_time}
+    Click Element    //i[@class='sure-white-icon']
+    Input Text    id=searchValue    com_selenium
+    Click Element    //i[@class='search-icon']
+    表格字符校验    xpath=//table[@id='DataTable']    2    2    测试企业
+    Close All Browsers
+    连接user数据库
+    数据库字符校验    SELECT NAME FROM `c_company_info` WHERE slug = 'SE'    测试企业
+    退出数据库
+    [Teardown]    烟厂列表数据清理
+
+新增-正常修改
+    [Setup]    修改烟厂数据准备
+    登录
+    进入烟厂列表
+    页面字符校验    //html/body/div[1]/a[2]    烟厂列表
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    id=DataTable
+    Click Element    //table[@id='DataTable']/tbody/tr[1]/td[7]/a
+    ${current_time}    Get Time    year month day
+    ${end_time}    Get Time    year month day    NOW + 7day
+    Input Text    id=stime    ${current_time}
+    Input Text    id=etime    ${end_time}
+    Click Element    //i[@class='sure-white-icon']
+    Input Text    id=searchValue    com_selenium
+    Click Element    //i[@class='search-icon']
+    ${nn}    Get Table Cell    //*[@id="DataTable"]/tbody/tr[1]/td[6]    2    6
+    log    ${nn}
+    Close All Browsers
+    连接user数据库
+    数据库字符校验    SELECT stime FROM `c_company_info` WHERE slug = 'SE'    ${current_time}
+    退出数据库
+    [Teardown]    烟厂列表数据清理
+
+新增-取消修改
+    [Setup]    修改烟厂数据准备
+    登录
+    进入烟厂列表
+    页面字符校验    //html/body/div[1]/a[2]    烟厂列表
+    页面元素校验    //html/body/div[2]/div[1]/div[1]/a    DataTable
+    Click Element    //table[@id='DataTable']/tbody/tr[1]/td[7]/a
+    ${current_time}    Get Time    year month day
+    ${end_time}    Get Time    year month day    NOW + 7day
+    Input Text    id=stime    ${current_time}
+    Input Text    id=etime    ${end_time}
+    Click Element    //i[@class='sure-white-icon']
+    Input Text    id=searchValue    com_selenium
+    Click Element    //i[@class='search-icon']
+    表格字符校验    xpath=//table[@id='DataTable']    2    2    测试企业
+    Close All Browsers
+    连接user数据库
+    数据库字符校验    SELECT NAME FROM `c_company_info` WHERE slug = 'SE'    测试企业
+    退出数据库
+    [Teardown]    烟厂列表数据清理

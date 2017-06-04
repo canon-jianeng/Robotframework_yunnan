@@ -1,0 +1,25 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chrome.exe    # 清理进程
+Test Teardown     安全退出
+Force Tags
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/01-SystemKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+
+*** Test Cases ***
+01-企业账户列表
+    登录
+    进入企业账户列表
+    页面名称校验    xpath=//div[@class='crumbs']/a[2]    企业账户列表
+    页面元素校验    id=DataTable    xpath=//a[@class="btn-a"]
+
+01-烟厂列表
+    登录
+    进入烟厂列表
+    页面名称校验    //div[@class='crumbs']/a[2]    烟厂列表
+    页面元素校验    id=DataTable    id=searchValue

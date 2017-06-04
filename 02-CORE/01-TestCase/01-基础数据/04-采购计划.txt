@@ -1,0 +1,135 @@
+*** Settings ***
+Suite Setup
+Test Setup        OperatingSystem.Run    taskkill /F /IM chromedriver.exe    # 清理进程
+Test Teardown     安全退出
+Force Tags
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增
+    [Setup]    修改物资管理数据准备
+    登录
+    进入采购计划
+    页面字符校验    //html/body/section/h1    基础数据 > 采购计划
+    点击添加按钮
+    Select From List    name=need    HT
+    Select From List    name=supply    yuzr02印刷厂
+    Select From List    name=year    2016
+    Select From List    name=units    张
+    点击选择按钮
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium
+    点击查询按钮
+    Click Element    name=materialInput
+    点击确定
+    Input Text    name=goodsnum    100
+    Input Text    name=waste    0
+    点击保存按钮
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium-test-2-小盒
+    点击查询按钮
+    ${test112}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    log    ${test112}
+    Close All Browsers
+    连接common数据库
+    数据库数值校验    SELECT materials_count \ FROM c_purchase_main WHERE purchase_number = '${test112}'    100
+    退出数据库
+    [Teardown]    采购计划数据清理
+
+新增-取消新增
+    [Setup]    修改物资管理数据准备
+    登录
+    进入采购计划
+    页面字符校验    //html/body/section/h1    基础数据 > 采购计划
+    点击添加按钮
+    Select From List    name=need    HT
+    Select From List    name=supply    yuzr02印刷厂
+    Select From List    name=year    2016
+    Select From List    name=units    张
+    点击选择按钮
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium
+    点击查询按钮
+    Click Element    name=materialInput
+    点击确定
+    Input Text    name=goodsnum    100
+    Input Text    name=waste    0
+    点击取消按钮
+    Close All Browsers
+    连接common数据库
+    数据库数值校验    SELECT COUNT(1) FROM c_purchase_main WHERE NAME LIKE '%selenium%'    0
+    退出数据库
+    [Teardown]    采购计划数据清理
+
+修改-正常修改
+    [Setup]    修改采购计划数据准备
+    登录
+    进入采购计划
+    页面字符校验    //html/body/section/h1    基础数据 > 采购计划
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium
+    点击查询按钮
+    Click Element    //a[contains(.,'修改')]
+    Input Text    name=goodsnum    101
+    点击保存按钮
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium-test-2-小盒
+    点击查询按钮
+    ${test112}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    log    ${test112}
+    Close All Browsers
+    连接common数据库
+    数据库数值校验    SELECT materials_count \ FROM c_purchase_main WHERE purchase_number = '${test112}'    101
+    退出数据库
+    [Teardown]    采购计划数据清理
+
+修改-取消修改
+    [Setup]    修改采购计划数据准备
+    登录
+    进入采购计划
+    页面字符校验    //html/body/section/h1    基础数据 > 采购计划
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium
+    点击查询按钮
+    点击修改按钮
+    Input Text    name=goodsnum    101
+    点击取消按钮
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium-test-2-小盒
+    点击查询按钮
+    ${test112}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    Close All Browsers
+    连接common数据库
+    数据库数值校验    SELECT materials_count \ FROM c_purchase_main WHERE purchase_number = '${test112}'    10
+    退出数据库
+    [Teardown]    采购计划数据清理
+
+删除-正常删除
+    [Setup]    修改采购计划数据准备
+    登录
+    进入采购计划
+    页面字符校验    //html/body/section/h1    基础数据 > 采购计划
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium
+    点击查询按钮
+    点击删除按钮
+    点击弹出框确认按钮
+    Close All Browsers
+    连接common数据库
+    数据库数值校验    SELECT COUNT(1) FROM c_purchase_main WHERE NAME LIKE '%selenium%' AND STATUS = '1'    0
+    退出数据库
+    [Teardown]    采购计划数据清理
+
+删除-取消删除
+    [Setup]    修改采购计划数据准备
+    登录
+    进入采购计划
+    页面字符校验    //html/body/section/h1    基础数据 > 采购计划
+    Input Text    //div[@class='form-inline j-form']/div[1]/input    selenium
+    点击查询按钮
+    点击删除按钮
+    点击弹出框取消按钮
+    Close All Browsers
+    连接common数据库
+    数据库数值校验    SELECT COUNT(1) FROM c_purchase_main WHERE NAME LIKE '%selenium%'    1
+    退出数据库
+    [Teardown]    采购计划数据清理

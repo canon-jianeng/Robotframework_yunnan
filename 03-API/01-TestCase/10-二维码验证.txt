@@ -1,0 +1,47 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+二维码验证get请求
+    ${key}    CreateKey    ${productcode}    ${barcode}    ${salt}
+    #传入get请求参数
+    ${dic}    Create Dictionary    sysCode=${syscode}    barcode=${barcode}    vcode=${vcode}    productCode=${productcode}    key=${key}
+    ...    scanId=${scanId}    ip=${ip}    targetArea=${targetArea}    lng=${lng}    lat=${lat}
+    create session    lj    ${host}
+    #发送get请求
+    ${test}    get request    lj    ${verification_uri}    \    ${dic}
+    #验证get请求返回值
+    Should Be Equal As Integers    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}
+    ${return_items}    Get Dictionary Items    ${return_text}
+    ${return_keys}    Get Dictionary Keys    ${return_text}
+    ${return_values}    Get Dictionary Values    ${return_text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    ${return_productname}    Get From Dictionary    ${return_text}    productName
+    Should Be Equal    ${return_productname}    ${materiials_name}
+
+二维码验证post请求
+    ${data}    Create Dictionary    Content-Type=${content_type}
+    #传入post请求参数
+    ${key}    CreateKey    ${productcode}    ${barcode}    ${salt}
+    ${dic}    Create Dictionary    sysCode=${syscode}    barcode=${barcode}    vcode=${vcode}    productCode=${productcode}    key=${key}
+    ...    phone=${mobile}    scanId=${scanId}    ip=${ip}
+    create session    lj    ${host}    ${data}
+    #发送post请求
+    ${test}    Post Request    lj    ${verification_uri}    data=${dic}
+    #验证post请求返回值
+    Should Be Equal As Integers    ${test.status_code}    200
+    ${return_text}    to json    ${test.text}

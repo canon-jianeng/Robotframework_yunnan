@@ -1,0 +1,18 @@
+*** Settings ***
+Library           Selenium2Library
+Library           OperatingSystem
+
+*** Keywords ***
+安全退出
+    Close All Browsers
+    Run Keyword If Test Failed    OperatingSystem.Run    taskkill /F /IM chromedriver.exe
+    Run Keyword And Ignore Error    OperatingSystem.Run    taskkill /F /IM chromedriver.exe
+
+设置速度
+    Set Selenium Speed    0.6seconds
+    Set Selenium Implicit Wait    5 seconds
+    Set Browser Implicit Wait    5 seconds
+    Set Selenium Timeout    10 seconds
+
+关闭所有浏览器
+    Close All Browsers

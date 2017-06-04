@@ -1,0 +1,47 @@
+*** Settings ***
+Force Tags        SMOKE
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+
+*** Test Cases ***
+01-增加用户积分
+    [Setup]    数据库添加用户及积分
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #获取params值(请求参数)
+    ${params_data}    Create Dictionary    pointType    ${point_type}    mobile    ${mobile}    point
+    ...    ${addpoint}
+    ${params}    dumps    ${params_data}
+    #传入get请求参数
+    ${dict}=    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=updatePoint    params=${params}
+    Create Session    yu    ${host}
+    #发送get请求
+    ${test}    Get Request    yu    ${uri}    \    ${dict}
+    #验证get请求返回值
+    Should Be Equal As Strings    ${test.status_code}    200
+    #将返回的数据转换为JSON格式
+    ${return_text}    to json    ${test.text}
+    ${return_items}    Get Dictionary Items    ${return_text}
+    ${return_keys}    Get Dictionary Keys    ${return_text}
+    ${return_values}    Get Dictionary Values    ${return_text}
+    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    Should Be Equal As Strings    ${return_msg}    积分领取成功
+    ${return_code}    Get From Dictionary    ${return_text}    code
+    Should Be Equal    ${return_code}    0
+    #数据库查询用户更改后的积分
+    连接营销平台数据库cloud2_activity
+    ${database_point}    query    SELECT up.point FROM `c_user_point` up JOIN `c_user_info` ui ON ui.id=up.user_id WHERE up.point_type=${point_type} AND ui.phone=${mobile}
+    ${point_value}    Evaluate    int(${database_point[0][0]})
+    ${point_sum}    Evaluate    int(${point})+${addpoint}
+    Should Be Equal As Strings    ${point_value}    ${point_sum}
+    退出数据库
+    [Teardown]    数据库删除用户及积分

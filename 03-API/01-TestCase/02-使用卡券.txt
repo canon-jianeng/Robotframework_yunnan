@@ -1,0 +1,38 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           RequestsLibrary
+Library           Selenium2Library
+Library           CustomRequest
+Library           Collections
+Library           json
+Library           XML
+Library           pymysql
+Resource          ../03-Variable/01-Variable.txt
+Resource          ../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../02-Keyword/02-UserKeyword.txt
+
+*** Test Cases ***
+使用卡券
+    #Key(加密串)取值方式为sysCode + timer + salt（盐）进行md5 加密后的结果
+    ${current_time}    Get Timestamp
+    ${md5}    CreateKey    ${current_time}    ${syscode}    ${salt}
+    #获取activity_id值
+    ${data_activityId}    可使用的卡券activity_id
+    ${length}    Get Length    ${data_activityId}
+    : FOR    ${i}    IN RANGE    ${length}
+    \    ${activityId}    Evaluate    str('${data_activityId[${i}]}')
+    \    ${data_params}    Create Dictionary    activityId=${activityId}    mobile=${mobile}
+    \    ${params}    Dumps    ${data_params}
+    \    log    ${params}
+    \    ${dict}    Create Dictionary    sysCode=${syscode}    timer=${current_time}    key=${md5}    serviceFlg=useCoupon
+    \    ...    params=${params}
+    \    Create Session    yu    ${host}
+    \    ${test}    Get Request    yu    ${uri}    \    ${dict}
+    \    Should Be Equal As Strings    ${test.status_code}    200
+    \    ${return_text}    To Json    ${test.text}
+    \    ${return_code}    Get From Dictionary    ${return_text}    code
+    \    Should Be Equal As Strings    ${return_code}    200
+    \    ${return_msg}    Get From Dictionary    ${return_text}    msg
+    \    Should Be Equal As Strings    ${return_msg}    成功
+    \    ${return_data}    Get From Dictionary    ${return_text}    data
+    退出数据库

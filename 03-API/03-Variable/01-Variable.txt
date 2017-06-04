@@ -1,0 +1,31 @@
+*** Variables ***
+${host}           http://192.168.0.121:43090/cloud2.extser    # 云南中烟营销平台
+${uri}            entry/service.do    # uri
+${syscode}        YYX
+${salt}           qwesdf==
+${productcode}    qxsj
+${barcode}        GGMXtf9DydXFg304
+${mobile}         18600000000
+${vcode}          022227
+${materiials_name}    硬玉溪-小盒
+${password}       123456
+${point_type}     130201
+${addpoint}       100
+${point}          300
+${barcode_uri}    verification/barcode.do
+${passwd}         405daea141cb2c601d9e15ecd0c49cf4
+${pwd}            111111
+${scanId}         0
+${ip}             192.168.1.126
+${targetArea}     深圳
+${lng}            22.5497734945
+${lat}            113.9818184437
+${verification_uri}    verification/barcode.do
+${content_type}    application/x-www-form-urlencoded
+${ctime}          1478764666000
+${barcode_scan}    8zYCTE346R5jf219
+${mobile_query}    18682032584
+${flowValue}      50M
+${retUri}         http://www.fooson.com
+${orderId}        selenium-test
+${amount}         5

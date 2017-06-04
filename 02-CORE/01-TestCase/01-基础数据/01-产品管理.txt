@@ -1,0 +1,154 @@
+*** Settings ***
+Test Setup        OperatingSystem.Run    taskkill /F /IM chromedriver.exe    # 清理进程
+Test Teardown     安全退出
+Library           Selenium2Library
+Library           DatabaseLibrary
+Library           pymysql
+Resource          ../../03-Variable/01-Variable.txt
+Resource          ../../02-Keyword/01-SystemKeyword.txt
+Resource          ../../02-Keyword/02-UserKeyword.txt
+Resource          ../../02-Keyword/03-DatabaseKeyword.txt
+Resource          ../../02-Keyword/04-ElementKeyword.txt
+
+*** Test Cases ***
+新增-正常新增-保存
+    [Setup]    新增产品数据清理
+    登录
+    进入产品管理
+    点击添加按钮
+    产品类型下拉框    0
+    产品名称文本框    selenium_test_unit
+    产品描述文本框    selenium_test_description
+    点击保存按钮
+    点击弹出框取消按钮
+    产品查询产品名称    selenium_test_unit
+    点击查询按钮
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    5    待启用
+    ${product_num}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    关闭所有浏览器
+    连接common数据库
+    数据库字符校验    SELECT `c_order_materials_section`.name FROM `c_order_materials_section` WHERE PRODUCT_SERIAL_NUM = '${product_num}'    selenium_test_unit
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+新增-正常新增-启用
+    [Setup]    新增产品数据清理
+    登录
+    进入产品管理
+    点击添加按钮
+    产品类型下拉框    0
+    产品名称文本框    selenium_test_unit
+    产品描述文本框    selenium_test_description
+    点击启用按钮
+    点击弹出框取消按钮
+    产品查询产品名称    selenium_test_unit
+    点击查询按钮
+    ${product_num}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    5    启用
+    关闭所有浏览器
+    连接common数据库
+    数据库字符校验    SELECT `c_order_materials_section`.name FROM `c_order_materials_section` WHERE PRODUCT_SERIAL_NUM = '${product_num}'    selenium_test_unit
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+新增-取消
+    [Setup]    新增产品数据清理
+    登录
+    进入产品管理
+    点击添加按钮
+    产品类型下拉框    0
+    产品名称文本框    selenium_test_unit
+    产品描述文本框    selenium_test_description
+    点击取消按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT COUNT(1) FROM c_order_materials_section WHERE NAME LIKE '%selenium%'    0
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+新增-产品名称为空
+    [Setup]    产品管理数据准备
+    登录
+    进入产品管理
+    点击添加按钮
+    产品类型下拉框    0
+    产品描述文本框    selenium_test_description
+    产品名称为空提示
+    页面字符校验    //span[@class='err-msg']    此元素不能为空
+    关闭所有浏览器
+    [Teardown]    新增产品数据清理
+
+修改-正常修改
+    [Setup]    产品管理数据准备
+    登录
+    进入产品管理
+    产品查询产品名称    selenium-test-2
+    点击查询按钮
+    点击修改按钮
+    产品描述文本框    selenium_test_description_modify
+    点击保存按钮
+    产品查询产品名称    selenium-test-2
+    点击查询按钮
+    ${product_num}    Get Table Cell    xpath=//table[@class="table table-bordered"]    2    2
+    表格字符校验    xpath=//table[@class="table table-bordered"]    2    5    待启用
+    关闭所有浏览器
+    连接common数据库
+    数据库字符校验    SELECT `c_order_materials_section`.DESCRIPTION FROM `c_order_materials_section` WHERE PRODUCT_SERIAL_NUM = '${product_num}'    selenium_test_description_modify
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+修改-正常停产
+    [Setup]    产品管理数据准备
+    登录
+    进入产品管理
+    产品查询产品名称    selenium-test-2
+    点击查询按钮
+    点击停产产品
+    点击弹出框确认按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT COUNT(*) AS num FROM c_order_materials_section WHERE NAME ='selenium-test-2'    0
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+修改-取消停产
+    [Setup]    产品管理数据准备
+    登录
+    进入产品管理
+    产品查询产品名称    selenium-test-2
+    点击查询按钮
+    点击停产产品
+    点击弹出框取消按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT COUNT(1) FROM c_order_materials_section WHERE NAME ='selenium-test-2'    1
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+删除-正常删除
+    [Setup]    产品管理数据准备
+    登录
+    进入产品管理
+    产品查询产品名称    selenium-test-2
+    点击查询按钮
+    点击删除产品
+    点击弹出框确认按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT COUNT(*) AS num FROM c_order_materials_section WHERE NAME ='selenium-test-2'    0
+    退出数据库
+    [Teardown]    新增产品数据清理
+
+删除-取消删除
+    [Setup]    产品管理数据准备
+    登录
+    进入产品管理
+    产品查询产品名称    selenium-test-2
+    点击查询按钮
+    点击删除产品
+    点击弹出框取消按钮
+    关闭所有浏览器
+    连接common数据库
+    数据库数值校验    SELECT COUNT(1) FROM c_order_materials_section WHERE NAME ='selenium-test-2'    1
+    退出数据库
+    [Teardown]    新增产品数据清理

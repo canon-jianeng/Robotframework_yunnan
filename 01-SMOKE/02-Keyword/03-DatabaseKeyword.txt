@@ -1,0 +1,164 @@
+*** Settings ***
+Library           DatabaseLibrary
+Library           pymysql
+Library           Selenium2Library
+
+*** Keywords ***
+连接common数据库
+    Connect To Database Using Custom Params    pymysql    database='cloud2_code_common', user='thwlstg', password='thwlstg', host='192.168.0.125', port=33306,charset='utf8'
+
+连接user数据库
+    Connect To Database Using Custom Params    pymysql    database='cloud2_user', user='thwlstg', password='thwlstg', host='192.168.0.125', port=33306,charset='utf8'
+
+退出数据库
+    Disconnect From Database
+
+新增产品数据清理
+    连接common数据库
+    Query    DELETE FROM c_order_section_info WHERE material_section_id IN( SELECT id FROM c_order_materials_section WHERE \ NAME LIKE '%selenium%');commit;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';commit;
+    退出数据库
+
+产品管理数据准备
+    连接common数据库
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';commit
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4002',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','300','111111','selenium-descrition');commit
+    退出数据库
+
+新增物资管理数据准备
+    连接common数据库
+    Query    DELETE FROM c_order_materials WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4003',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','263','111111','selenium-descrition');COMMIT;
+    退出数据库
+
+修改物资管理数据准备
+    连接common数据库
+    Query    DELETE FROM c_order_materials WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4003',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','263','111111','selenium-descrition');COMMIT;
+    Query    INSERT INTO c_order_materials (NAME,TYPE,STATUS,ctime,utime,cuid,com_id,webpath,materiials_section_id,material_serial_num,MATERIALS_DESC,IS_PWD,IS_ENCODE,IS_ACTIVITY,is_configured) \ VALUE ('selenium-test-2-小盒','2301','1101',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','263','www.test.com', \ (SELECT id FROM c_order_materials_section WHERE NAME LIKE '%selenium%' OR DESCRIPTION LIKE '%selenium%'),'111111111','description-selenium','0','0','0','0');COMMIT;
+    退出数据库
+
+物资管理数据清理
+    连接common数据库
+    Query    DELETE FROM c_order_materials WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';COMMIT;
+    退出数据库
+
+印刷厂管理数据清理
+    连接user数据库
+    Query    DELETE FROM `c_company_info` WHERE (NAME LIKE '%selenium%' AND TYPE = '1704') OR slug = '99';COMMIT;
+    Query    DELETE FROM sys_user WHERE username LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM `sys_user_detail` WHERE description LIKE '%selenium%';COMMIT
+    退出数据库
+
+修改印刷厂管理数据准备
+    连接user数据库
+    Query    DELETE FROM sys_user WHERE username LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM `c_company_info` WHERE NAME LIKE '%selenium%' AND TYPE = '1704';COMMIT;
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) VALUES ('test_print_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'TS','selenium','test_selenium','300','0')
+    Query    INSERT INTO `c_company_info` (NAME,slug,TYPE,address,uid,stime,etime,ENCODE,cuid,ctime,UUID,utime,STATUS,remark,parent_comId) VALUES ('selenium_print','99','1704','address_selenium',(SELECT id FROM sys_user WHERE username LIKE '%selenium%'),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'GPF25ULG1GOCB01K361E736LBESORM4K','759',CURRENT_TIMESTAMP,'759',CURRENT_TIMESTAMP,'1','selenium_test','0');COMMIT;
+    退出数据库
+
+新增印刷厂数据准备
+    连接user数据库
+    Query    DELETE FROM `c_company_info` WHERE (NAME LIKE '%selenium%' AND TYPE = '1704') OR slug = '99';COMMIT;
+    Query    DELETE FROM sys_user WHERE username LIKE '%selenium%';COMMIT;
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) VALUES ('print_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'TS','selenium','test_selenium','300','0');commit;
+    退出数据库
+
+采购计划数据清理
+    物资管理数据清理
+    连接common数据库
+    Query    DELETE FROM c_purchase_main WHERE NAME LIKE '%selenium%';commit;
+    退出数据库
+
+修改采购计划数据准备
+    连接common数据库
+    Query    DELETE FROM c_order_materials WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM c_order_materials_section WHERE NAME LIKE '%selenium%';COMMIT;
+    Query    INSERT INTO c_order_materials_section(STATUS,ctime,utime,cuid,NAME,TYPE,com_id,PRODUCT_SERIAL_NUM,description) VALUES ('4003',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','selenium-test-2','0','263','111111','selenium-descrition');COMMIT;
+    Query    INSERT INTO c_order_materials (NAME,TYPE,STATUS,ctime,utime,cuid,com_id,webpath,materiials_section_id,material_serial_num,MATERIALS_DESC,IS_PWD,IS_ENCODE,IS_ACTIVITY,is_configured) \ VALUE ('selenium-test-2-小盒','2301','1101',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'721','263','www.test.com', \ (SELECT id FROM c_order_materials_section WHERE NAME LIKE '%selenium%' OR DESCRIPTION LIKE '%selenium%'),'111111111','description-selenium','0','0','0','0');COMMIT;
+    Query    INSERT INTO c_purchase_main (purchase_id,print_id,purchase_number,materials_id,YEAR,materials_count,loss,ctime,utime,com_id,cuid,STATUS,units,NAME,code_count) VALUES ('307','310','HT532016989338',(SELECT id FROM `c_order_materials` WHERE NAME LIKE '%selenium%'),'2016','10','0',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'300','759','1','2','selenium-test-2-小盒-HT-20160612','10');commit;
+    退出数据库
+
+作业单管理数据清理
+    连接common数据库
+    Query    DELETE FROM c_order_info WHERE NAME LIKE '%selenium%';commit;
+    退出数据库
+
+数据库字符校验
+    [Arguments]    ${get_database_value}    ${except_value}
+    ${temp_variable_001}    Query    ${get_database_value}
+    Should Be Equal    ${except_value}    ${temp_variable_001[0][0]}
+
+数据库数值校验
+    [Arguments]    ${get_database_value}    ${except_value}
+    ${temp_variable_002}    Query    ${get_database_value}
+    ${temp_variable_003}    Evaluate    int(${except_value})
+    Should Be Equal    ${temp_variable_002[0][0]}    ${temp_variable_003}
+
+印刷厂唯一性校验数据准备
+    连接user数据库
+    Query    DELETE FROM sys_user WHERE username LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM `c_company_info` WHERE NAME LIKE '%selenium%' AND TYPE = '1704';COMMIT;
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) VALUES ('test_print_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'TS','selenium','test_selenium','300','0')
+    Query    INSERT INTO `c_company_info` (NAME,slug,TYPE,uid,stime,etime,ENCODE,cuid,ctime,UUID,utime,STATUS,remark,parent_comId) \ VALUES ('selenium_print','99','1704',(SELECT id FROM sys_user WHERE username LIKE '%selenium%'),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'GPF25ULG1GOCB01K361E736LBESORM4K','759',CURRENT_TIMESTAMP,'759',CURRENT_TIMESTAMP,'1','selenium_test','0');COMMIT;
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) \ VALUES ('print_selenium2','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) \ VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium2%'),'TS','selenium2','test_selenium2','300','0');COMMIT;
+    退出数据库
+
+启用印刷厂管理数据准备
+    连接user数据库
+    Query    DELETE FROM sys_user WHERE username LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM `c_company_info` WHERE NAME LIKE '%selenium%' AND TYPE = '1704';COMMIT;
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) VALUES ('test_print_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'TS','selenium','test_selenium','300','0')
+    Query    INSERT INTO `c_company_info` (NAME,slug,TYPE,address,uid,stime,etime,ENCODE,cuid,ctime,UUID,utime,STATUS,remark,parent_comId) VALUES ('selenium_print','99','1704','address_selenium',(SELECT id FROM sys_user WHERE username LIKE '%selenium%'),CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,'GPF25ULG1GOCB01K361E736LBESORM4K','759',CURRENT_TIMESTAMP,'759',CURRENT_TIMESTAMP,'2','selenium_test','0');COMMIT;
+    退出数据库
+
+新增企业账户数据准备
+    企业账户列表数据清理
+    连接user数据库
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) \ VALUES ('com_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) \ VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'TS','selenium','test_selenium','300','0');commit;
+    退出数据库
+
+企业账户列表数据清理
+    连接user数据库
+    Query    DELETE FROM `c_company_info` WHERE (NAME LIKE '%selenium%' AND TYPE = '1701') OR slug = 'SE';COMMIT;
+    Query    DELETE FROM sys_user WHERE username LIKE '%selenium%';COMMIT;
+    Query    DELETE FROM `sys_user_detail` WHERE description LIKE '%selenium%';COMMIT;
+    退出数据库
+
+新增烟厂数据准备
+    企业账户列表数据清理
+    连接user数据库
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) \ VALUES ('fac_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) \ VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'FA','selenium','test_selenium','300','0');commit;
+    退出数据库
+
+角色管理数据清理
+    连接user数据库
+    Query    DELETE FROM sys_role WHERE NAME LIKE '%selenium%';COMMIT;
+    退出数据库
+
+账户管理数据清理
+    连接user数据库
+    Query    DELETE FROM sys_user WHERE NAME LIKE '%selenium%';COMMIT;
+    退出数据库
+
+修改角色管理数据准备
+    连接user数据库
+    Query    INSERT INTO `sys_role` (NAME,description,enabled,uId,createDate) VALUES ('selenium-test','selenium--test——role','1','759',CURRENT_TIMESTAMP);COMMIT;
+    退出数据库
+
+修改账户管理数据准备
+    连接user数据库
+    Query    INSERT INTO `sys_user` (username,PASSWORD,salt,enabled,createDate,appId,uid,TYPE,userType) \ VALUES ('fac_selenium','ef209c9343ca8c715265781876657b18','5c0b3af87d2292a5e1093e6ab17fc870','1',CURRENT_TIMESTAMP,'0','759','common','user');COMMIT;
+    Query    INSERT INTO `sys_user_detail` (id,NAME,jobName,description,comId,sellerId) \ VALUES ((SELECT id FROM sys_user WHERE sys_user.`username` LIKE '%Selenium%'),'FA','selenium','test_selenium','300','0');commit;
+    退出数据库
